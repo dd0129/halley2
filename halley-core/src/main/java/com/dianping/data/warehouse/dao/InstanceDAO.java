@@ -16,7 +16,7 @@ public interface InstanceDAO {
 
     public void saveInstanceRela(List<InstanceRelaDO> list);
 
-    public List<InstanceDO> getInstanceInfo(@Param("instanceId") String instanceId);
+    public InstanceDO getInstanceInfo(@Param("instanceId") String instanceId);
 
     public List<InstanceDO> getReadyTaskList(@Param("status") Integer status,@Param("triggerTime") Long triggerTime);
 

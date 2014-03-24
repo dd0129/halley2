@@ -3,7 +3,7 @@
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.dianping.data.warehouse.dao.InstanceDAO">
-    <resultMap id="instanceRela" type="instanceRela" >
+    <resultMap id="instRela" type="instanceRela" >
         <result property="instanceId"   column="task_status_id"  />
         <result property="taskId"          column="task_id"         />
         <result property="preInstanceId"   column="pre_sts_id"       />
@@ -11,7 +11,7 @@
         <result property="timestamp"       column="time_stamp"    />
     </resultMap>
 
-	<resultMap id="instance" type="instance" >
+	<resultMap id="inst" type="instance" >
         <id property="instanceId"   column="task_status_id"  />
         <result property="taskId"          column="task_id"         />
         <result property="taskName"        column="task_name"       />
@@ -82,9 +82,7 @@
         </foreach>
 	</update>
 
-
-
-    <select id="getReadyTaskList" resultMap="instance" >
+    <select id="getReadyTaskList" resultMap="inst" >
 		select * from etl_task_status where status = #{status} and trigger_time &lt;= #{triggerTime}
 	</select>
 
@@ -92,14 +90,15 @@
         update etl_task_status set status = #{status} where task_status_id=#{instanceId}
     </update>
 
-    <select id="getRelaInstanceList" resultMap="instance">
+    <select id="getRelaInstanceList" resultMap="inst">
         select a.task_status_Id,a.task_id,a.task_name,a.status From etl_task_status a left join etl_taskrela_status b on a.task_status_id = b.pre_sts_id
           where b.task_status_id =#{instanceId}
     </select>
 
-    <select id="getInstanceInfo" resultType="instance" >
-		select * from etl_task_status a where task_status_id=#{instanceId}
+    <select id="getInstanceInfo" resultMap="inst" >
+		select * from etl_task_status a where task_status_id = #{instanceId}
 	</select>
-	
+
+
 
 </mapper>

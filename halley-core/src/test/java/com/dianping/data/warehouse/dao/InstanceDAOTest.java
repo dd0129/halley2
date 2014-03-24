@@ -36,10 +36,9 @@ public class InstanceDAOTest {
 
     @Test
     public void testGetInstanceInfo() throws Exception {
-//        String s = "1000120120509";
-//        List<InstanceDO> inst = dao.getInstanceInfo(s);
-//        System.out.println(inst.get(0).getInstanceId());
-//        Assert.assertEquals(s,inst.get(0).getInstanceId());
+        String s = "1000120120509";
+        InstanceDO inst = dao.getInstanceInfo(s);
+        Assert.assertEquals(s,inst.getInstanceId());
     }
 
     @Test
