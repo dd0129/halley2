@@ -21,7 +21,6 @@ public class GlobalResource {
 
     static {
         DEPLOY_HOME = System.getenv("deploy_home");
-        CONF_PATH = System.getenv("conf_path");
 
         Properties props = new Properties();
         try{

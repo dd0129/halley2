@@ -10,10 +10,16 @@ import java.util.Map;
  * Created by hongdi.tang on 14-2-5.
  */
 public class ParameterUtils {
+
     public static String resourceParamHandle(String para){
         for(Map.Entry<String,String> entry : GlobalResource.ENV_PROPS.entrySet()){
             para = StringUtils.replace(para,entry.getKey(), entry.getValue());
         }
         return para;
     }
+
+    public static boolean isValidateOffsetType(String offsetType){
+        return "offset".equals(offsetType);
+    }
+
 }

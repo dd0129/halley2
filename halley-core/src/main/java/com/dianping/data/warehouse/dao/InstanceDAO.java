@@ -18,9 +18,16 @@ public interface InstanceDAO {
 
     public InstanceDO getInstanceInfo(@Param("instanceId") String instanceId);
 
-    public List<InstanceDO> getReadyTaskList(@Param("status") Integer status,@Param("triggerTime") Long triggerTime);
+    public List<InstanceDO> getInitInstanceList(@Param("status") Integer status,@Param("triggerTime") Long triggerTime);
 
-    public Integer updateTaskReady(@Param("instanceId")String instanceId,@Param("status") Integer status);
+    public List<InstanceDO> getReadyInstanceList(@Param("status") Integer status);
+
+    public void updateInstnaceStatus(@Param("instanceId")String instanceId,@Param("status") Integer status,@Param("desc") String desc);
+
+    public void updateInstnaceRunning(@Param("instanceId")String instanceId,@Param("status") Integer status,@Param("desc") String desc);
 
     public List<InstanceDO> getRelaInstanceList(@Param("instanceId") String instanceId);
+
+    public Integer updateInstnaceListStatus(@Param("initStatus") Integer initStatus,@Param("desc") String desc,@Param("waitStatus") Integer waitStatus);
+
 }

@@ -412,54 +412,59 @@ public class DateUtils {
     }
 
     public static String getReplaceCal(String para, String offset_type, String offset, Date init_date)  {
-        String cal_dt = DateUtils.get_cal_dt(DateUtils.getLastDay10(init_date), offset_type, offset);
-        if (para == null || para.trim().equals("")) {
-            return null;
+        try{
+            String cal_dt = DateUtils.get_cal_dt(DateUtils.getLastDay10(init_date), offset_type, offset);
+            if (para == null || para.trim().equals("")) {
+                return null;
+            }
+            String ncal_dt = DateUtils.getNCal_dt(cal_dt, "${ncal_dt}");
+            String cal_dt8 = DateUtils.getCal_dt8(cal_dt, "${cal_dt8}");
+            String ncal_dt8 = DateUtils.getNCal_dt8(cal_dt, "${ncal_dt8}");
+
+            String last_week8 = DateUtils.getLastWeek8(cal_dt, "${last_week8}");
+            String last_week10 = DateUtils.getLastWeek10(cal_dt, "${last_week10}");
+
+            String end_day_last_month8 = DateUtils.getEndDayThisMonth8(cal_dt, "${end_day_this_month8}");
+            String end_day_last_month10 = DateUtils.getEndDayThisMonth10(cal_dt, "${end_day_this_month10}");
+
+            String mon_next_week8 = DateUtils.getMonNextWeek8(cal_dt, "${monday_next_week8}");
+            String mon_next_week10 = DateUtils.getMonNextWeek10(cal_dt, "${monday_next_week10}");
+
+            String first_day_this_month8 = DateUtils.getFirstDayThisMonth8(cal_dt, "${first_day_this_month8}");
+            String first_day_this_month10 = DateUtils.getFirstDayThisMonth10(cal_dt, "${first_day_this_month10}");
+
+            String first_day_last_month8 = DateUtils.getFirstDayLastMonth8(cal_dt, "${first_day_last_month8}");
+            String first_day_last_month10 = DateUtils.getFirstDayLastMonth10(cal_dt, "${first_day_last_month10}");
+
+            String last_day_last_month8 = DateUtils.getLastDayLastMonth8(cal_dt, "${last_day_last_month8}");
+            String last_day_last_month10 = DateUtils.getLastDayLastMonth10(cal_dt, "${last_day_last_month10}");
+
+            String this_hour = DateUtils.getThisHour(init_date);
+
+            String Ndays_cal_dt = DateUtils.getNdays_cal_dt(cal_dt, "${30days_cal_dt}");
+
+            return para.replace("${cal_dt}", cal_dt)
+                    .replace("${ncal_dt}", ncal_dt)
+                    .replace("${cal_dt8}", cal_dt8)
+                    .replace("${ncal_dt8}", ncal_dt8)
+                    .replace("${last_week8}", last_week8)
+                    .replace("${last_week10}", last_week10)
+                    .replace("${monday_next_week8}", mon_next_week8)
+                    .replace("${monday_next_week10}", mon_next_week10)
+                    .replace("${end_day_this_month8}", end_day_last_month8)
+                    .replace("${end_day_this_month10}", end_day_last_month10)
+                    .replace("${first_day_this_month8}", first_day_this_month8)
+                    .replace("${first_day_this_month10}", first_day_this_month10)
+                    .replace("${first_day_last_month8}", first_day_last_month8)
+                    .replace("${first_day_last_month10}", first_day_last_month10)
+                    .replace("${last_day_last_month8}", last_day_last_month8)
+                    .replace("${last_day_last_month10}", last_day_last_month10)
+                    .replace("${this_hour}", this_hour)
+                    .replace("${30days_cal_dt}", Ndays_cal_dt);
+        }catch (Exception e){
+            return "";
         }
-        String ncal_dt = DateUtils.getNCal_dt(cal_dt, "${ncal_dt}");
-        String cal_dt8 = DateUtils.getCal_dt8(cal_dt, "${cal_dt8}");
-        String ncal_dt8 = DateUtils.getNCal_dt8(cal_dt, "${ncal_dt8}");
 
-        String last_week8 = DateUtils.getLastWeek8(cal_dt, "${last_week8}");
-        String last_week10 = DateUtils.getLastWeek10(cal_dt, "${last_week10}");
-
-        String end_day_last_month8 = DateUtils.getEndDayThisMonth8(cal_dt, "${end_day_this_month8}");
-        String end_day_last_month10 = DateUtils.getEndDayThisMonth10(cal_dt, "${end_day_this_month10}");
-
-        String mon_next_week8 = DateUtils.getMonNextWeek8(cal_dt, "${monday_next_week8}");
-        String mon_next_week10 = DateUtils.getMonNextWeek10(cal_dt, "${monday_next_week10}");
-
-        String first_day_this_month8 = DateUtils.getFirstDayThisMonth8(cal_dt, "${first_day_this_month8}");
-        String first_day_this_month10 = DateUtils.getFirstDayThisMonth10(cal_dt, "${first_day_this_month10}");
-
-        String first_day_last_month8 = DateUtils.getFirstDayLastMonth8(cal_dt, "${first_day_last_month8}");
-        String first_day_last_month10 = DateUtils.getFirstDayLastMonth10(cal_dt, "${first_day_last_month10}");
-
-        String last_day_last_month8 = DateUtils.getLastDayLastMonth8(cal_dt, "${last_day_last_month8}");
-        String last_day_last_month10 = DateUtils.getLastDayLastMonth10(cal_dt, "${last_day_last_month10}");
-
-        String this_hour = DateUtils.getThisHour(init_date);
-
-        String Ndays_cal_dt = DateUtils.getNdays_cal_dt(cal_dt, "${30days_cal_dt}");
-
-        return para.replace("${cal_dt}", cal_dt)
-                .replace("${ncal_dt}", ncal_dt)
-                .replace("${cal_dt8}", cal_dt8)
-                .replace("${ncal_dt8}", ncal_dt8)
-                .replace("${last_week8}", last_week8)
-                .replace("${last_week10}", last_week10)
-                .replace("${monday_next_week8}", mon_next_week8)
-                .replace("${monday_next_week10}", mon_next_week10)
-                .replace("${end_day_this_month8}", end_day_last_month8)
-                .replace("${end_day_this_month10}", end_day_last_month10)
-                .replace("${first_day_this_month8}", first_day_this_month8)
-                .replace("${first_day_this_month10}", first_day_this_month10)
-                .replace("${first_day_last_month8}", first_day_last_month8)
-                .replace("${first_day_last_month10}", first_day_last_month10)
-                .replace("${last_day_last_month8}", last_day_last_month8)
-                .replace("${last_day_last_month10}", last_day_last_month10)
-                .replace("${this_hour}", this_hour)
-                .replace("${30days_cal_dt}", Ndays_cal_dt);
 
     }
 

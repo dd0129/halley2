@@ -82,12 +82,20 @@
         </foreach>
 	</update>
 
-    <select id="getReadyTaskList" resultMap="inst" >
+    <select id="getInitInstanceList" resultMap="inst" >
 		select * from etl_task_status where status = #{status} and trigger_time &lt;= #{triggerTime}
 	</select>
 
-    <update id="updateTaskReady" >
-        update etl_task_status set status = #{status} where task_status_id=#{instanceId}
+    <update id="updateInstnaceStatus" >
+        update etl_task_status set status = #{status},sts_desc=#{desc} where task_status_id=#{instanceId}
+    </update>
+
+    <update id="updateInstnaceRunning" >
+        update etl_task_status set status = #{status},sts_desc=#{desc},run_num=run_num+1 where task_status_id=#{instanceId}
+    </update>
+
+    <update id="updateInstnaceListStatus" >
+        update etl_task_status set status = #{initStatus},sts_desc=#{desc} where status = #{waitStatus}
     </update>
 
     <select id="getRelaInstanceList" resultMap="inst">
@@ -97,6 +105,10 @@
 
     <select id="getInstanceInfo" resultMap="inst" >
 		select * from etl_task_status a where task_status_id = #{instanceId}
+	</select>
+
+    <select id="getReadyInstanceList" resultMap="inst" >
+		select * from etl_task_status a where status = #{status} order by running_prio desc,run_num,prio_lvl,rand()
 	</select>
 
 

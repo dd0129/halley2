@@ -28,4 +28,7 @@ public class Const {
 
     public final static Integer TASK_EXISTS_PRE  = 1;
     public final static Integer TASK_NONEXISTS_PRE = 0;
+
+    public final static Integer TASK_IF_WAIT = 1;
+    public final static String EMPTH_STRING = "";
 }

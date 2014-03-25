@@ -19,12 +19,12 @@ public class ReadyExecuter {
     private InstanceDAO instDAO;
 
     public void execute(){
-        List<InstanceDO> list = instDAO.getReadyTaskList(Const.JOB_STATUS.JOB_INIT.getValue(),System.currentTimeMillis());
+        List<InstanceDO> list = instDAO.getInitInstanceList(Const.JOB_STATUS.JOB_INIT.getValue(),System.currentTimeMillis());
         for(InstanceDO inst : list){
             try{
                 boolean flag = this.updateTask(inst);
                 if(flag){
-                    this.instDAO.updateTaskReady(inst.getInstanceId(),Const.JOB_STATUS.JOB_READY.getValue());
+                    this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_READY.getValue(),Const.JOB_STATUS.JOB_READY.getDesc());
                 }
             }catch(Exception e){
                 logger.error(inst.getInstanceId() + "(" + inst.getTaskName() + ") update ready error",e);

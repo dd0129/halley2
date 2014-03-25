@@ -43,15 +43,17 @@ public class InstanceDAOTest {
 
     @Test
     public void testGetReadyTaskList() throws Exception {
-        List<InstanceDO> list = dao.getReadyTaskList(Const.JOB_STATUS.JOB_INIT.getValue(),1556723123242L);
+        List<InstanceDO> list = dao.getInitInstanceList(Const.JOB_STATUS.JOB_INIT.getValue(), 1556723123242L);
         System.out.println(list.size());
         Assert.assertNotNull(list);
     }
     @Test
     public void testUpdateTaskReay() throws Exception {
-        Integer flag = this.dao.updateTaskReady("1000120120514", Const.JOB_STATUS.JOB_READY.getValue());
-        System.out.println(flag);
-        Assert.assertEquals(flag, Integer.valueOf(1));
+        this.dao.updateInstnaceStatus("1000120120514", Const.JOB_STATUS.JOB_READY.getValue(), Const.JOB_STATUS.JOB_READY.getDesc());
+    } 
+    @Test
+    public void testUpdateInstanceRunning() throws Exception {
+        this.dao.updateInstnaceRunning("1000120120514", Const.JOB_STATUS.JOB_RUNNING.getValue(), Const.JOB_STATUS.JOB_RUNNING.getDesc());
     }
     @Test
     public void testGetRelaInstanceList() throws Exception {
@@ -59,6 +61,23 @@ public class InstanceDAOTest {
         logger.info(String.valueOf(list.size()));
         Assert.assertNotNull(list.size());
     }
+
+    @Test
+    public void testGetReadyInstanceList() throws Exception {
+        List<InstanceDO> list = this.dao.getReadyInstanceList(Const.JOB_STATUS.JOB_READY.getValue());
+        logger.info(String.valueOf(list.size()));
+        Assert.assertNotNull(list.size());
+    }
+    @Test
+    public void testUpdateInstnaceListStatus() throws Exception {
+        Integer rtn = this.dao.updateInstnaceListStatus
+                (Const.JOB_STATUS.JOB_INIT.getValue(),Const.JOB_STATUS.JOB_INIT.getDesc(),
+                Const.JOB_STATUS.JOB_WAIT.getValue());
+        System.out.println(rtn);
+        Assert.assertNotNull(rtn);
+    }
+
+
 
 
 

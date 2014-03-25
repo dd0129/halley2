@@ -23,7 +23,7 @@ import java.util.*;
 /**
  * Created by adima on 14-3-23.
  */
-public class InstanceInit {
+public class InstanceInitExecuter {
     @Resource(name="taskDAO")
     private TaskDAO taskDAO;
 
@@ -34,7 +34,7 @@ public class InstanceInit {
     private Map<Integer,List<TaskRelaDO>> relaMap;
     private Map<Integer,List<TaskRelaDO>> reverseRelaMap;
 
-    private Logger logger = LoggerFactory.getLogger(InstanceInit.class);
+    private Logger logger = LoggerFactory.getLogger(InstanceInitExecuter.class);
 
 
     public void execute(){
@@ -53,33 +53,34 @@ public class InstanceInit {
         for(TaskDO task : list){
             Date triggerTime = begin;
             CronExpression expression = null;
-            try {
-                expression = new CronExpression(task.getFreq());
-            } catch (Exception e) {
-                logger.error(task.getTaskId() + " init error");
-                logger.error(task.getTaskId() + "(" +task.getTaskName() + ")" + " " + task.getFreq()+ "is illegal cron expression", e);
-                continue;
-            }
-            while(true){
-                triggerTime = expression.getNextInvalidTimeAfter(triggerTime);
-                InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),triggerTime);
-                if(triggerTime.getTime() > end.getTime()){
-                    break;
+            if(CronExpression.isValidExpression(task.getFreq())){
+                logger.error(task.getTaskId() + "(" +task.getTaskName() + ")" + " " + task.getFreq()+ "is illegal cron expression");
+                InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),null);
+                this.saveInstance(inst);
+
+            }else{
+                while(true){
+                    triggerTime = expression.getNextInvalidTimeAfter(triggerTime);
+                    InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),triggerTime);
+                    if(triggerTime.getTime() > end.getTime()){
+                        break;
+                    }
+                    //instDAO.getInstanceInfo(inst.getInstanceId()).getInstanceId()
+                    if(StringUtils.isBlank(null)){
+                        DynamicPriority dp = new DynamicPriority(inst.getTaskId(),inst.getPrioLvl());
+                        //验证任务正确性，检查是否包含自包含
+                        //调用内部类获取任务score
+                        Integer score = dp.calculateScore(inst.getTaskId(),inst.getPrioLvl());
+                        inst.setRunningPrio(score);
+                        //将任务和依赖存储到intance表
+                        this.saveInstance(inst);
+                        logger.info(new StringBuilder().append(inst.getInstanceId()).append("(").
+                                append(inst.getTaskName()).append(") init successful;").append("score :=")
+                                .append(inst.getRunningPrio()).toString());
+                    }
                 }
-                //instDAO.getInstanceInfo(inst.getInstanceId()).getInstanceId()
-                if(StringUtils.isBlank(null)){
-                    DynamicPriority dp = new DynamicPriority(inst.getTaskId(),inst.getPrioLvl());
-                    //验证任务正确性，检查是否包含自包含
-                    //调用内部类获取任务score
-                    Integer score = dp.calculateScore(inst.getTaskId(),inst.getPrioLvl());
-                    inst.setRunningPrio(score);
-                    //将任务和依赖存储到intance表
-                    this.saveInstance(inst);
-                    logger.info(new StringBuilder().append(inst.getInstanceId()).append("(").
-                            append(inst.getTaskName()).append(") init successful;").append("score :=")
-                            .append(inst.getRunningPrio()).toString());
-                }
             }
+
         }
     }
 
@@ -134,26 +135,28 @@ public class InstanceInit {
         String desc = Const.JOB_STATUS.JOB_INIT.getDesc();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currTime = formatter.format(new Date());
+        instanceId = TaskUtils.generateInstanceID(task.getTaskId(),task.getCycle(),triggerTime);
+
+        para1 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara1(), task.getOffsetType(), task.getOffset(), triggerTime))
+                .replace("${task_id}", String.valueOf(task.getTaskId()))
+                .replace("${instance_id}", instanceId)
+                .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
+        para2 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara2(), task.getOffsetType(), task.getOffset(), triggerTime))
+                .replace("${task_id}", String.valueOf(task.getTaskId()))
+                .replace("${instance_id}", instanceId)
+                .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
+        para3 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara3(), task.getOffsetType(), task.getOffset(), triggerTime))
+                .replace("${task_id}", String.valueOf(task.getTaskId()))
+                .replace("${instance_id}", instanceId)
+                .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
         try{
-            String logTail = DateUtils.getDay8();
             cycle = DateUtils.getDay10(triggerTime);
             String lastDay = DateUtils.getLastDay10(triggerTime);
-             instanceId = TaskUtils.generateInstanceID(task.getTaskId(),task.getCycle(),triggerTime);
-            para1 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara1(), task.getOffsetType(), task.getOffset(), triggerTime))
-                    .replace("${task_id}", String.valueOf(task.getTaskId()))
-                    .replace("${instance_id}", instanceId)
-                    .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
-            para2 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara2(), task.getOffsetType(), task.getOffset(), triggerTime))
-                    .replace("${task_id}", String.valueOf(task.getTaskId()))
-                    .replace("${instance_id}", instanceId)
-                    .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
-            para3 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara3(), task.getOffsetType(), task.getOffset(), triggerTime))
-                    .replace("${task_id}", String.valueOf(task.getTaskId()))
-                    .replace("${instance_id}", instanceId)
-                    .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
+
+
             logPath = new StringBuilder(ParameterUtils.resourceParamHandle(task.getLogHome()))
                     .append(File.separator).append(task.getLogFile().trim()).append(".")
-                    .append(instanceId).append(".").append(logTail).toString();
+                    .append(instanceId).append(".").append(DateUtils.getDay8()).toString();
             calDt = DateUtils.get_cal_dt(lastDay, task.getOffsetType(), task.getOffset());
         }catch(Exception e){
             logger.error(task.getTaskId() + " init error",e);
