@@ -125,6 +125,9 @@ public class TaskValidator {
         return rtn;
     }
 
+//    public static String[] validateKeyPropery(TaskDO task){
+//
+//    }
 
     public static String[] validateTask(TaskDO task){
         StringBuilder builder = new StringBuilder();

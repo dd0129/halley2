@@ -10,6 +10,7 @@ import com.dianping.data.warehouse.domain.TaskRelaDO;
 import com.dianping.data.warehouse.utils.DateUtils;
 import com.dianping.data.warehouse.utils.ParameterUtils;
 import com.dianping.data.warehouse.utils.TaskUtils;
+import com.dianping.data.warehouse.validator.TaskValidator;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -55,9 +56,6 @@ public class InstanceInitExecuter {
             CronExpression expression = null;
             if(CronExpression.isValidExpression(task.getFreq())){
                 logger.error(task.getTaskId() + "(" +task.getTaskName() + ")" + " " + task.getFreq()+ "is illegal cron expression");
-                InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),null);
-                this.saveInstance(inst);
-
             }else{
                 while(true){
                     triggerTime = expression.getNextInvalidTimeAfter(triggerTime);
@@ -131,11 +129,22 @@ public class InstanceInitExecuter {
     private InstanceDO generateInstance(TaskDO task,List<TaskRelaDO> relaList,Date triggerTime){
         String instanceId =null,cycle=null,para1=null,
                para2=null,para3=null,logPath=null,calDt = null;
-        Integer status = Const.JOB_STATUS.JOB_INIT.getValue();
-        String desc = Const.JOB_STATUS.JOB_INIT.getDesc();
+
+        String[] rtn = TaskValidator.validateTask(task);
+        instanceId = TaskUtils.generateInstanceID(task.getTaskId(),task.getCycle(),triggerTime);
+        String desc = null;
+        Integer status = null;
+        if(rtn[0].equals("1")){
+            status = Const.JOB_STATUS.JOB_INIT.getValue();
+            desc = Const.JOB_STATUS.JOB_INIT.getDesc();
+        }else{
+            status = Const.JOB_STATUS.JOB_INIT_ERROR.getValue();
+            desc = Const.JOB_STATUS.JOB_INIT_ERROR.getDesc();
+            logger.error(task.getTaskId()+"("+task.getTaskName()+")" + " init error");
+        }
+
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currTime = formatter.format(new Date());
-        instanceId = TaskUtils.generateInstanceID(task.getTaskId(),task.getCycle(),triggerTime);
 
         para1 = ParameterUtils.resourceParamHandle(DateUtils.getReplaceCal(task.getPara1(), task.getOffsetType(), task.getOffset(), triggerTime))
                 .replace("${task_id}", String.valueOf(task.getTaskId()))
@@ -153,15 +162,12 @@ public class InstanceInitExecuter {
             cycle = DateUtils.getDay10(triggerTime);
             String lastDay = DateUtils.getLastDay10(triggerTime);
 
-
             logPath = new StringBuilder(ParameterUtils.resourceParamHandle(task.getLogHome()))
                     .append(File.separator).append(task.getLogFile().trim()).append(".")
                     .append(instanceId).append(".").append(DateUtils.getDay8()).toString();
             calDt = DateUtils.get_cal_dt(lastDay, task.getOffsetType(), task.getOffset());
         }catch(Exception e){
             logger.error(task.getTaskId() + " init error",e);
-            status =  Const.JOB_STATUS.JOB_INIT_ERROR.getValue();
-            desc = Const.JOB_STATUS.JOB_INIT_ERROR.getDesc();
         }
 
         InstanceDO inst = new InstanceDO();
