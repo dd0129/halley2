@@ -7,7 +7,6 @@ public class Const {
         private Integer value;
         private String desc;
 
-        private JOB_STATUS(){}
         private JOB_STATUS(Integer value){
             this.value = value;
         }
@@ -31,4 +30,55 @@ public class Const {
 
     public final static Integer TASK_IF_WAIT = 1;
     public final static String EMPTH_STRING = "";
+
+    public static enum TASK_TYPE{
+        WORMHOLE(1),CALCULATE(2);
+
+        private Integer value;
+        private TASK_TYPE(Integer value){
+            this.value = value;
+        }
+        public Integer getValue(){
+            return this.value;
+        }
+    }
+
+    public static enum TASK_CYCLE{
+        M,D,W,H,mi;
+    }
+
+    public static enum TASK_IFWAIT{
+        WAITED(1),UNWAITED(0);
+        private Integer value;
+        private TASK_IFWAIT(Integer value){
+            this.value = value;
+        }
+        public Integer getValue(){
+            return this.value;
+        }
+    }
+
+    public static enum TASK_IFPRE{
+        EXISTS_PRE(1),NON_PRE(0);
+        private Integer value;
+        private TASK_IFPRE(Integer value){
+            this.value = value;
+        }
+        public Integer getValue(){
+            return this.value;
+        }
+    }
+
+    public static enum TASK_IFRECALL{
+        RECALL(1),NON_RECALL(0);
+        private Integer value;
+        private TASK_IFRECALL(Integer value){
+            this.value = value;
+        }
+        public Integer getValue(){
+            return this.value;
+        }
+    }
+
+
 }

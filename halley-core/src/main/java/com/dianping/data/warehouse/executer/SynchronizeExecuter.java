@@ -7,6 +7,7 @@ import com.dianping.data.warehouse.resource.ResourceManager;
 import com.dianping.data.warehouse.resource.RunningQueueManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Map;
 /**
  * Created by hongdi.tang on 14-3-24.
  */
+@Service("synchronizeExecuter")
 public class SynchronizeExecuter {
     private static final Logger logger = LoggerFactory.getLogger(SynchronizeExecuter.class);
 

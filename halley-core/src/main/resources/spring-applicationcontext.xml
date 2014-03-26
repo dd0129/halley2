@@ -17,6 +17,8 @@
            http://www.springframework.org/schema/jdbc 
            http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd">
 
+    <context:component-scan base-package="com.dianping" />
+
 	<context:annotation-config />
 	<context:component-scan base-package="com.dianping" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
@@ -42,4 +44,5 @@
 		p:dataSource-ref="dataSource" />
 
 	<!--<tx:annotation-driven />-->
+
 </beans>

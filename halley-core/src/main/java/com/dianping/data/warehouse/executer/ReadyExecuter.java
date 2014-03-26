@@ -5,6 +5,7 @@ import com.dianping.data.warehouse.dao.InstanceDAO;
 import com.dianping.data.warehouse.domain.InstanceDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 /**
  * Created by adima on 14-3-23.
  */
+@Service("readyExecuter")
 public class ReadyExecuter {
     private static final Logger logger = LoggerFactory.getLogger(ReadyExecuter.class);
 

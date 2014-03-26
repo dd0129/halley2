@@ -6,14 +6,14 @@ import com.dianping.data.warehouse.domain.InstanceDO;
 import com.dianping.data.warehouse.resource.RunningQueueManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by adima on 14-3-24.
  */
+@Service("timeoutExecuter")
 public class TimeoutExecuter {
     private static Logger logger = LoggerFactory.getLogger(TimeoutExecuter.class);
 

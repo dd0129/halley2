@@ -4,12 +4,14 @@ import com.dianping.data.warehouse.common.Const;
 import com.dianping.data.warehouse.dao.InstanceDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 /**
  * Created by adima on 14-3-24.
  */
+@Service("waitExecuter")
 public class WaitExecuter {
 
     private static Logger logger = LoggerFactory.getLogger(WaitExecuter.class);

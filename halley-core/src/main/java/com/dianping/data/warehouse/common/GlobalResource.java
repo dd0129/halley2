@@ -14,14 +14,15 @@ public class GlobalResource {
     private GlobalResource(){}
     private static final Logger logger = LoggerFactory.getLogger(GlobalResource.class);
 
-    public static String CONF_PATH;
     public static String DEPLOY_HOME;
     private static final String CFG_FILE = "conf/env.properties";
     public static Map<String,String> ENV_PROPS = new HashMap<String,String>();
 
     static {
         DEPLOY_HOME = System.getenv("deploy_home");
-
+        if(DEPLOY_HOME == null){
+            throw new NullPointerException("deploy home is null");
+        }
         Properties props = new Properties();
         try{
             props.load(GlobalResource.class.getClassLoader().getResourceAsStream(CFG_FILE));
@@ -36,6 +37,7 @@ public class GlobalResource {
     }
 
     public void print(){
+        System.out.println("222222");
 
     }
 

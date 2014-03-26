@@ -1,10 +1,14 @@
 package com.dianping.data.warehouse.utils;
 
 
+import com.dianping.data.warehouse.common.Const;
 import com.dianping.data.warehouse.common.GlobalResource;
+import com.dianping.data.warehouse.domain.TaskDO;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by hongdi.tang on 14-2-5.
@@ -18,8 +22,6 @@ public class ParameterUtils {
         return para;
     }
 
-    public static boolean isValidateOffsetType(String offsetType){
-        return "offset".equals(offsetType);
-    }
+
 
 }
