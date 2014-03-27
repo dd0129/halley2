@@ -1,6 +1,8 @@
 package com.dianping.data.warehouse.utils;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,21 +11,7 @@ import java.util.Date;
 
 @Deprecated
 public class DateUtils {
-    public static Date string2Date(String s) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        sdf.applyPattern("yyyy-MM-dd");
-        Calendar c = Calendar.getInstance();
-        return sdf.parse(s);
-    }
-
-    public static String Date2String(Date d) {
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        sdf.applyPattern("yyyyMMddHHmmssSSS");
-        Calendar c = Calendar.getInstance();
-        c.setTime(d);
-        return sdf.format(c.getTime());
-    }
-
+    private static Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     public static String getAppointDay(String time_id, String type, int gap) throws ParseException{
         SimpleDateFormat sdf = new SimpleDateFormat();
@@ -73,9 +61,15 @@ public class DateUtils {
     }
 
     public static String getLastDay10(Date d) {
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        sdf.applyPattern("yyyy-MM-dd");
-        return sdf.format(new Date(d.getTime() - 86400 * 1000));
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat();
+            sdf.applyPattern("yyyy-MM-dd");
+            return sdf.format(new Date(d.getTime() - 86400 * 1000));
+        }catch(Exception e){
+            logger.error("get last day error",e);
+            return null;
+        }
+
     }
 
     private static String getFirstDayLastMonth10(String time_id) throws Exception {
@@ -107,16 +101,21 @@ public class DateUtils {
             StringUtils.substring(offset,1);
             int gap = Integer.valueOf(StringUtils.substring(offset,1));
             if (gap >= 100) {
-                throw new RuntimeException(gap + " is illegal for interval more than 1000");
+                logger.error(gap + " is illegal for interval more than 1000");
+                return null;
             }
             try{
                 return DateUtils.getAppointDay(time_id, type2, gap);
             }catch(Exception e){
-                throw new RuntimeException("get appoint day error",e);
+                logger.error("get appoint day error",e);
+                return null;
             }
         } else {
-            throw new RuntimeException(offset + " is illegal");
+            logger.error(offset + " is illegal");
+            return null;
         }
+
+
     }
 
     public static String getNCal_dt(String cal_dt, String pattern) {
@@ -414,8 +413,8 @@ public class DateUtils {
     public static String getReplaceCal(String para, String offset_type, String offset, Date init_date)  {
         try{
             String cal_dt = DateUtils.get_cal_dt(DateUtils.getLastDay10(init_date), offset_type, offset);
-            if (para == null || para.trim().equals("")) {
-                return null;
+            if (StringUtils.isBlank(para)) {
+                return para;
             }
             String ncal_dt = DateUtils.getNCal_dt(cal_dt, "${ncal_dt}");
             String cal_dt8 = DateUtils.getCal_dt8(cal_dt, "${cal_dt8}");
@@ -462,37 +461,18 @@ public class DateUtils {
                     .replace("${this_hour}", this_hour)
                     .replace("${30days_cal_dt}", Ndays_cal_dt);
         }catch (Exception e){
-            return "";
+            logger.error("date variable is illegal",e);
+            return null;
         }
 
 
     }
 
-    public static String generateInstanceID(String task_id, String type, Date init_date) throws Exception {
-        if (type.equals("H")) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
-            return task_id + sdf.format(init_date);
-        } else if (type.equals("D")) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd00");
-            return task_id + sdf.format(init_date);
-        } else if (type.equals("W")) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMWW00");
-            return task_id + sdf.format(init_date);
-        } else if (type.equals("M")) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMM0100");
-            return task_id + sdf.format(init_date);
-        } else if (type.equals("mi")) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-            return task_id + sdf.format(init_date);
-        } else {
-            throw new Exception("error input cycle type " + type);
-        }
-    }
 
     public static String generateRelaInstanceID(Integer pre_id, Long fire_time, String gap){
-        Calendar cal1 = Calendar.getInstance();
-        cal1.setTimeInMillis(fire_time);
-        Date date = cal1.getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(fire_time);
+        Date date = calendar.getTime();
 
         String type = gap.substring(0, 1);
         int interval = new Integer(gap.substring(1));
@@ -530,9 +510,9 @@ public class DateUtils {
             String pre_str_date = sdf1.format(cal.getTime());
             return pre_id + pre_str_date;
         } else {
-            throw new RuntimeException("error input cycle type " + type);
+            logger.error("error input cycle gap " + gap);
+            return null;
         }
-
     }
 
 }

@@ -18,7 +18,7 @@ public class TimeoutExecuter {
     private static Logger logger = LoggerFactory.getLogger(TimeoutExecuter.class);
 
 
-    @Resource(name="InstanceDAO")
+    @Resource(name="instanceDAO")
     private InstanceDAO instDAO;
 
     public void execute(){

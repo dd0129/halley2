@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -24,6 +25,7 @@ import java.util.*;
 /**
  * Created by adima on 14-3-23.
  */
+@Service("instanceInitExecuter")
 public class InstanceInitExecuter {
     @Resource(name="taskDAO")
     private TaskDAO taskDAO;
@@ -54,15 +56,19 @@ public class InstanceInitExecuter {
         for(TaskDO task : list){
             Date triggerTime = begin;
             CronExpression expression = null;
-            if(CronExpression.isValidExpression(task.getFreq())){
+            String rtn[] = TaskValidator.validateCycle(task.getCycle());
+            if(rtn[0].equals("0") ){
+                logger.error(task.getTaskId() + "(" +task.getTaskName() + ") cycle "+task.getCycle() + " is illegal" );
+            }else if(CronExpression.isValidExpression(task.getFreq())){
                 logger.error(task.getTaskId() + "(" +task.getTaskName() + ")" + " " + task.getFreq()+ "is illegal cron expression");
             }else{
                 while(true){
                     triggerTime = expression.getNextInvalidTimeAfter(triggerTime);
-                    InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),triggerTime);
                     if(triggerTime.getTime() > end.getTime()){
                         break;
                     }
+                    InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),triggerTime);
+
                     //instDAO.getInstanceInfo(inst.getInstanceId()).getInstanceId()
                     if(StringUtils.isBlank(null)){
                         DynamicPriority dp = new DynamicPriority(inst.getTaskId(),inst.getPrioLvl());
@@ -102,21 +108,21 @@ public class InstanceInitExecuter {
         return result;
     }
 
-    private Map<Integer,List<TaskRelaDO>> convertReverseRelaMap(){
-        List<TaskRelaDO> relaList =  taskDAO.getTaskRelaList();
-        Map<Integer,List<TaskRelaDO>> result = new HashMap<Integer,List<TaskRelaDO>>();
-        for(TaskRelaDO rela : relaList ){
-            if(!result.containsKey(rela.getPreId())){
-                List<TaskRelaDO> tmp = new ArrayList<TaskRelaDO>();
-                tmp.add(rela);
-                result.put(rela.getPreId(),tmp);
-            }else{
-                List tmp = result.get(rela.getPreId());
-                tmp.add(rela);
-            }
-        }
-        return result;
-    }
+//    private Map<Integer,List<TaskRelaDO>> convertReverseRelaMap(){
+//        List<TaskRelaDO> relaList =  taskDAO.getTaskRelaList();
+//        Map<Integer,List<TaskRelaDO>> result = new HashMap<Integer,List<TaskRelaDO>>();
+//        for(TaskRelaDO rela : relaList ){
+//            if(!result.containsKey(rela.getPreId())){
+//                List<TaskRelaDO> tmp = new ArrayList<TaskRelaDO>();
+//                tmp.add(rela);
+//                result.put(rela.getPreId(),tmp);
+//            }else{
+//                List tmp = result.get(rela.getPreId());
+//                tmp.add(rela);
+//            }
+//        }
+//        return result;
+//    }
 
     private Map<Integer,TaskDO> convertTaskMap(List<TaskDO> list){
         Map<Integer,TaskDO> result = new HashMap<Integer,TaskDO>();
@@ -128,12 +134,13 @@ public class InstanceInitExecuter {
 
     private InstanceDO generateInstance(TaskDO task,List<TaskRelaDO> relaList,Date triggerTime){
         String instanceId =null,cycle=null,para1=null,
-               para2=null,para3=null,logPath=null,calDt = null;
+               para2=null,para3=null,logPath=null,calDt = null,
+               desc = null;
+        Integer status = null;
 
         String[] rtn = TaskValidator.validateTask(task);
         instanceId = TaskUtils.generateInstanceID(task.getTaskId(),task.getCycle(),triggerTime);
-        String desc = null;
-        Integer status = null;
+
         if(rtn[0].equals("1")){
             status = Const.JOB_STATUS.JOB_INIT.getValue();
             desc = Const.JOB_STATUS.JOB_INIT.getDesc();
@@ -158,17 +165,14 @@ public class InstanceInitExecuter {
                 .replace("${task_id}", String.valueOf(task.getTaskId()))
                 .replace("${instance_id}", instanceId)
                 .replace("${unix_timestamp}", String.valueOf(triggerTime.getTime() / 1000));
-        try{
-            cycle = DateUtils.getDay10(triggerTime);
-            String lastDay = DateUtils.getLastDay10(triggerTime);
 
-            logPath = new StringBuilder(ParameterUtils.resourceParamHandle(task.getLogHome()))
-                    .append(File.separator).append(task.getLogFile().trim()).append(".")
-                    .append(instanceId).append(".").append(DateUtils.getDay8()).toString();
-            calDt = DateUtils.get_cal_dt(lastDay, task.getOffsetType(), task.getOffset());
-        }catch(Exception e){
-            logger.error(task.getTaskId() + " init error",e);
-        }
+        cycle = DateUtils.getDay10(triggerTime);
+        String lastDay = DateUtils.getLastDay10(triggerTime);
+
+        logPath = new StringBuilder(ParameterUtils.resourceParamHandle(task.getLogHome()))
+                .append(File.separator).append(task.getLogFile().trim()).append(".")
+                .append(instanceId).append(".").append(DateUtils.getDay8()).toString();
+        calDt = DateUtils.get_cal_dt(lastDay, task.getOffsetType(), task.getOffset());
 
         InstanceDO inst = new InstanceDO();
         inst.setInstanceId(instanceId);
@@ -206,23 +210,27 @@ public class InstanceInitExecuter {
         inst.setTimeout(task.getTimeout());
         inst.setRecallLimit(task.getRecallLimit());
         inst.setRecallInterval(task.getRecallInterval());
+        inst.setTimestamp(currTime);
 
-        List<TaskRelaDO> list =  relaMap.get(task.getTaskId());
-        for(TaskRelaDO relaDO : list){
+        List<InstanceRelaDO> instRelaList = new ArrayList<InstanceRelaDO>();
+        if(relaList == null){
+            return inst;
+        }
+        for(TaskRelaDO relaDO : relaList){
             InstanceRelaDO instRela = new InstanceRelaDO();
             instRela.setInstanceId(instanceId);
             instRela.setTaskId(task.getTaskId());
-            String preInstanceId = DateUtils.generateRelaInstanceID(relaDO.getPreId(), triggerTime.getTime(),
+            String preInstanceId = TaskUtils.generateRelaInstanceID(relaDO.getPreId(), triggerTime.getTime(),
                     relaDO.getCycleGap());
             instRela.setPreInstanceId(preInstanceId);
             instRela.setPreId(relaDO.getPreId());
         }
-        inst.setInstRelaList(null);
+        inst.setInstRelaList(instRelaList);
         return inst;
     }
 
 
-    private class DynamicPriority {
+    class DynamicPriority {
         DynamicPriority(Integer baseId,Integer level) {
             this.rootNodeId = baseId;
             if (level == 1) {
@@ -248,13 +256,14 @@ public class InstanceInitExecuter {
         private Map<Integer, Integer> scoreMap = new HashMap<Integer, Integer>();
 
 
-        int calculateScore(int task_id, int prioLvl) {
+        int calculateScore(int taskId, int prioLvl) {
             if (prioLvl < 1) {
                 return 401;
             }
             if (prioLvl > 3) {
                 return 0;
             }
+            this.generateScoreMap(taskId);
             for (Integer prio : scoreMap.values()) {
                 if (prio != null) {
                     point = point + 1d / prio * this.quotiety;

@@ -109,7 +109,7 @@ public class TaskValidator {
         return rtn;
     }
 
-    private static String[] validateCycle(String cycle){
+    public static String[] validateCycle(String cycle){
         boolean flag = false;
         Const.TASK_CYCLE[] codes = Const.TASK_CYCLE.values();
         for (Const.TASK_CYCLE code : codes) {
@@ -126,7 +126,17 @@ public class TaskValidator {
     }
 
 //    public static String[] validateKeyPropery(TaskDO task){
-//
+//        StringBuilder builder = new StringBuilder();
+//        String[] rtn = validateCycle(task.getCycle());
+//        if(rtn[1] != null){
+//            builder.append(rtn[1]);
+//        }
+//        String msg = null;
+//        if(!StringUtils.isBlank(builder.toString())){
+//            msg = builder.toString();
+//        }
+//        boolean flag =  rtn[0].equals("1");
+//        return null;
 //    }
 
     public static String[] validateTask(TaskDO task){
@@ -138,7 +148,6 @@ public class TaskValidator {
         String[] rtn4 = validateTaskType(task.getType());
         String[] rtn5 = validateIfPre(task.getIfPre());
         String[] rtn6 = validateOffsetType(task.getOffsetType(), task.getOffset());
-        String[] rtn7 = validateCycle(task.getCycle());
 
         if(rtn1[1] != null){
             builder.append(rtn1[1]);
@@ -158,9 +167,7 @@ public class TaskValidator {
         if(rtn6[1] != null){
             builder.append(rtn6[1]);
         }
-        if(rtn7[1] != null){
-            builder.append(rtn7[1]);
-        }
+
         String msg = null;
         if(!StringUtils.isBlank(builder.toString())){
             msg = builder.toString();
@@ -171,8 +178,7 @@ public class TaskValidator {
                 rtn3[0].equals("1") &&
                 rtn4[0].equals("1") &&
                 rtn5[0].equals("1") &&
-                rtn6[0].equals("1") &&
-                rtn7[0].equals("1");
+                rtn6[0].equals("1");
         return new String[]{flag?"1":"0",msg};
     }
 }

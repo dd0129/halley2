@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
@@ -18,6 +19,7 @@ import java.util.List;
 /**
  * Created by adima on 14-3-24.
  */
+@Transactional
 @Service("instanceExecuter")
 public class InstanceExecuter {
     private static Logger logger = LoggerFactory.getLogger(InstanceExecuter.class);

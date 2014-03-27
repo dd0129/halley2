@@ -1,5 +1,8 @@
 package com.dianping.data.warehouse.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,6 +11,7 @@ import java.util.Date;
  * Created by adima on 14-3-23.
  */
 public class TaskUtils {
+    private static Logger logger = LoggerFactory.getLogger(TaskUtils.class);
     private TaskUtils(){}
 
     public static String generateInstanceID(Integer task_id, String type, Date init_date)  {
@@ -31,7 +35,9 @@ public class TaskUtils {
         }
     }
 
-    public static String generateRelaInstanceID(String pre_id, Long fire_time, String gap) throws Exception {
+
+
+    public static String generateRelaInstanceID(Integer pre_id, Long fire_time, String gap){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(fire_time);
         Date date = calendar.getTime();
@@ -72,8 +78,8 @@ public class TaskUtils {
             String pre_str_date = sdf1.format(cal.getTime());
             return pre_id + pre_str_date;
         } else {
-            throw new Exception("error input cycle type " + type);
+            logger.error("error input cycle gap " + gap);
+            return null;
         }
-
     }
 }
