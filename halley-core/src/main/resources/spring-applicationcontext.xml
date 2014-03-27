@@ -14,8 +14,6 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <context:component-scan base-package="com.dianping" />
-
 	<context:annotation-config />
 	<context:component-scan base-package="com.dianping" />
 	<aop:aspectj-autoproxy proxy-target-class="true" />
@@ -40,18 +38,19 @@
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:dataSource-ref="dataSource" />
 
-	<tx:annotation-driven />
+	<!--<tx:annotation-driven />-->
 
+    <!-- transaction -->
     <aop:config>
         <aop:pointcut id="defaultServiceOperation"
                       expression="execution(* com.dianping.data.warehouse.executer.*.*(..))"/>
         <aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
     </aop:config>
 
-    <tx:advice id="defaultTxAdvice">
+    <tx:advice id="defaultTxAdvice" transaction-manager="transactionManager">
         <tx:attributes>
-            <tx:method name="save*" read-only="true"/>
-            <tx:method name="*"/>
+            <tx:method name="save*"/>
+            <!--<tx:method name="*"/>-->
         </tx:attributes>
     </tx:advice>
 

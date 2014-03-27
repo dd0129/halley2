@@ -24,6 +24,7 @@ public class InstanceDAOTest {
 
     @Resource(name="instanceDAO")
     private InstanceDAO dao;
+
     @Test
     public void testSaveInstance() throws Exception {
 

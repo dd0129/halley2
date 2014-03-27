@@ -56,7 +56,6 @@ public class InstanceInitExecuterTest {
                 method.invoke(instanceInit,relaList);
         Assert.assertNotNull(output.size());
         Assert.assertSame(output.get(500832).size(),46);
-
     }
 
     @Test
@@ -67,6 +66,21 @@ public class InstanceInitExecuterTest {
         Assert.assertNotNull(output.size());
         Assert.assertEquals(output.size(), 4827);
         Assert.assertEquals(output.get(200531).getCycle(), "D");
+    }
+
+    @Test
+    public void testSaveInstance() throws Exception{
+        Method method = InstanceInitExecuter.class.getDeclaredMethod("generateInstance", TaskDO.class,List.class,Date.class);
+        TaskDO task = list.get(2);
+        List<TaskRelaDO> relaList = relaMap.get(task.getTaskId());
+        method.setAccessible(true);
+        InstanceDO output = (InstanceDO)method.invoke(instanceInit,task,relaList,new Date());
+        output.setTaskId(234235234);
+
+        Method method1 = InstanceInitExecuter.class.getDeclaredMethod("saveInstance", InstanceDO.class);
+        method1.setAccessible(true);
+        method1.invoke(instanceInit,output);
+
     }
 
     @Test

@@ -89,8 +89,11 @@ public class InstanceInitExecuter {
     }
 
     private void saveInstance(InstanceDO inst){
-        this.instDAO.saveInstance(inst);
-        this.instDAO.saveInstanceRela(inst.getInstRelaList());
+        instDAO.saveInstance(inst);
+        if(1==1){
+            throw new RuntimeException("test");
+        }
+        instDAO.saveInstanceRela(inst.getInstRelaList());
     }
 
     private Map<Integer,List<TaskRelaDO>> convertRelaMap(List<TaskRelaDO> relaList){
