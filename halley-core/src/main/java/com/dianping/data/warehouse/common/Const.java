@@ -30,6 +30,7 @@ public class Const {
 
     public final static Integer TASK_IF_WAIT = 1;
     public final static String EMPTH_STRING = "";
+    public final static Integer DEFAULT_TASK_JOBCODE = -1;
 
     public static enum TASK_TYPE{
         WORMHOLE(1),CALCULATE(2);

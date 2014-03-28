@@ -43,7 +43,7 @@
     <!-- transaction -->
     <aop:config>
         <aop:pointcut id="defaultServiceOperation"
-                      expression="execution(* com.dianping.data.warehouse.executer.*.*(..))"/>
+                      expression="execution(* com.dianping.data.warehouse.dao.proxy.*.*(..))"/>
         <aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
     </aop:config>
 

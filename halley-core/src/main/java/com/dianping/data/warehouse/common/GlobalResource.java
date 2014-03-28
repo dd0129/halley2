@@ -19,7 +19,8 @@ public class GlobalResource {
     public static Map<String,String> ENV_PROPS = new HashMap<String,String>();
 
     static {
-        DEPLOY_HOME = System.getenv("deploy_home");
+        //DEPLOY_HOME = System.getenv("deploy_home");
+        DEPLOY_HOME = "d:/";
         if(DEPLOY_HOME == null){
             throw new NullPointerException("deploy home is null");
         }

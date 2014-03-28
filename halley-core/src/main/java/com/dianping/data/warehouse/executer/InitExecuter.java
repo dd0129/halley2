@@ -3,6 +3,7 @@ package com.dianping.data.warehouse.executer;
 import com.dianping.data.warehouse.common.Const;
 import com.dianping.data.warehouse.dao.InstanceDAO;
 import com.dianping.data.warehouse.dao.TaskDAO;
+import com.dianping.data.warehouse.dao.proxy.InstanceDAOProxy;
 import com.dianping.data.warehouse.domain.InstanceDO;
 import com.dianping.data.warehouse.domain.InstanceRelaDO;
 import com.dianping.data.warehouse.domain.TaskDO;
@@ -16,9 +17,11 @@ import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -26,27 +29,26 @@ import java.util.*;
  * Created by adima on 14-3-23.
  */
 @Service("instanceInitExecuter")
-public class InstanceInitExecuter {
+public class InitExecuter {
     @Resource(name="taskDAO")
     private TaskDAO taskDAO;
 
     @Resource(name="instanceDAO")
     private InstanceDAO instDAO;
 
-    private Map<Integer,TaskDO> taskMap;
-    private Map<Integer,List<TaskRelaDO>> relaMap;
-    private Map<Integer,List<TaskRelaDO>> reverseRelaMap;
+    @Resource(name="instanceDAOProxy")
+    private InstanceDAOProxy instDAOProxy;
 
-    private Logger logger = LoggerFactory.getLogger(InstanceInitExecuter.class);
+    private Logger logger = LoggerFactory.getLogger(InitExecuter.class);
 
 
     public void execute(){
         //查询所有有效任务
         List<TaskDO> list = taskDAO.getValidateTaskList(Const.TASK_VALIDATE);
         List<TaskRelaDO> relaList =  taskDAO.getTaskRelaList();
-        taskMap = this.convertTaskMap(list);
-        relaMap = this.convertRelaMap(relaList);
-        reverseRelaMap = this.convertRelaMap(relaList);
+        Map<Integer,TaskDO> taskMap = this.convertTaskMap(list);
+        Map<Integer,List<TaskRelaDO>> relaMap = this.convertRelaMap(relaList);
+        Map<Integer,List<TaskRelaDO>> reverseRelaMap = this.convertReverseRelaMap(relaList);
 
         //查询所有依赖
         Date begin = new Date();
@@ -56,45 +58,48 @@ public class InstanceInitExecuter {
         for(TaskDO task : list){
             Date triggerTime = begin;
             CronExpression expression = null;
+            try{
+                 expression = new CronExpression(task.getFreq());
+            }catch(ParseException e){
+                logger.error(task.getTaskId() + "(" +task.getTaskName() + ")" + " " + task.getFreq()+ " is illegal cron expression");
+                continue;
+            }
             String rtn[] = TaskValidator.validateCycle(task.getCycle());
             if(rtn[0].equals("0") ){
                 logger.error(task.getTaskId() + "(" +task.getTaskName() + ") cycle "+task.getCycle() + " is illegal" );
-            }else if(CronExpression.isValidExpression(task.getFreq())){
-                logger.error(task.getTaskId() + "(" +task.getTaskName() + ")" + " " + task.getFreq()+ "is illegal cron expression");
             }else{
                 while(true){
-                    triggerTime = expression.getNextInvalidTimeAfter(triggerTime);
-                    if(triggerTime.getTime() > end.getTime()){
-                        break;
+                    try{
+                        triggerTime = expression.getNextValidTimeAfter(triggerTime);
+                        if(triggerTime.getTime() > end.getTime()){
+                            break;
+                        }
+                        InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),triggerTime);
+                        if(this.instDAO.getInstanceInfo(inst.getInstanceId())!=null){
+                            continue;
+                        }
+                        if(StringUtils.isBlank(null)){
+                            DynamicPriority dp = new DynamicPriority(inst.getTaskId(),inst.getPrioLvl(),taskMap,reverseRelaMap);
+                            //调用内部类获取任务score
+                            Integer score = dp.calculateScore(inst.getTaskId(),inst.getPrioLvl());
+                            inst.setRunningPrio(score);
+                            //将任务和依赖存储到intance表
+                            this.instDAOProxy.saveInstance(inst);
+                            logger.info(new StringBuilder().append(inst.getInstanceId()).append("(").
+                                    append(inst.getTaskName()).append(") init successful;").append("score :=")
+                                    .append(inst.getRunningPrio()).toString());
+                        }
+                    }catch(Exception e){
+                        logger.error(task.getTaskId() + "(" +task.getTaskName() + ") init error",e);
                     }
-                    InstanceDO inst = this.generateInstance(task,relaMap.get(task.getTaskId()),triggerTime);
 
-                    //instDAO.getInstanceInfo(inst.getInstanceId()).getInstanceId()
-                    if(StringUtils.isBlank(null)){
-                        DynamicPriority dp = new DynamicPriority(inst.getTaskId(),inst.getPrioLvl());
-                        //验证任务正确性，检查是否包含自包含
-                        //调用内部类获取任务score
-                        Integer score = dp.calculateScore(inst.getTaskId(),inst.getPrioLvl());
-                        inst.setRunningPrio(score);
-                        //将任务和依赖存储到intance表
-                        this.saveInstance(inst);
-                        logger.info(new StringBuilder().append(inst.getInstanceId()).append("(").
-                                append(inst.getTaskName()).append(") init successful;").append("score :=")
-                                .append(inst.getRunningPrio()).toString());
-                    }
                 }
             }
 
         }
     }
 
-    private void saveInstance(InstanceDO inst){
-        instDAO.saveInstance(inst);
-        if(1==1){
-            throw new RuntimeException("test");
-        }
-        instDAO.saveInstanceRela(inst.getInstRelaList());
-    }
+
 
     private Map<Integer,List<TaskRelaDO>> convertRelaMap(List<TaskRelaDO> relaList){
         Map<Integer,List<TaskRelaDO>> result = new HashMap<Integer,List<TaskRelaDO>>();
@@ -111,21 +116,20 @@ public class InstanceInitExecuter {
         return result;
     }
 
-//    private Map<Integer,List<TaskRelaDO>> convertReverseRelaMap(){
-//        List<TaskRelaDO> relaList =  taskDAO.getTaskRelaList();
-//        Map<Integer,List<TaskRelaDO>> result = new HashMap<Integer,List<TaskRelaDO>>();
-//        for(TaskRelaDO rela : relaList ){
-//            if(!result.containsKey(rela.getPreId())){
-//                List<TaskRelaDO> tmp = new ArrayList<TaskRelaDO>();
-//                tmp.add(rela);
-//                result.put(rela.getPreId(),tmp);
-//            }else{
-//                List tmp = result.get(rela.getPreId());
-//                tmp.add(rela);
-//            }
-//        }
-//        return result;
-//    }
+    private Map<Integer,List<TaskRelaDO>> convertReverseRelaMap(List<TaskRelaDO> relaList){
+        Map<Integer,List<TaskRelaDO>> result = new HashMap<Integer,List<TaskRelaDO>>();
+        for(TaskRelaDO rela : relaList ){
+            if(!result.containsKey(rela.getPreId())){
+                List<TaskRelaDO> tmp = new ArrayList<TaskRelaDO>();
+                tmp.add(rela);
+                result.put(rela.getPreId(),tmp);
+            }else{
+                List tmp = result.get(rela.getPreId());
+                tmp.add(rela);
+            }
+        }
+        return result;
+    }
 
     private Map<Integer,TaskDO> convertTaskMap(List<TaskDO> list){
         Map<Integer,TaskDO> result = new HashMap<Integer,TaskDO>();
@@ -214,6 +218,7 @@ public class InstanceInitExecuter {
         inst.setRecallLimit(task.getRecallLimit());
         inst.setRecallInterval(task.getRecallInterval());
         inst.setTimestamp(currTime);
+        inst.setJobCode(Const.DEFAULT_TASK_JOBCODE);
 
         List<InstanceRelaDO> instRelaList = new ArrayList<InstanceRelaDO>();
         if(relaList == null){
@@ -223,10 +228,11 @@ public class InstanceInitExecuter {
             InstanceRelaDO instRela = new InstanceRelaDO();
             instRela.setInstanceId(instanceId);
             instRela.setTaskId(task.getTaskId());
-            String preInstanceId = TaskUtils.generateRelaInstanceID(relaDO.getPreId(), triggerTime.getTime(),
-                    relaDO.getCycleGap());
+            String preInstanceId = TaskUtils.generateRelaInstanceID(relaDO.getPreId(), triggerTime.getTime(),relaDO.getCycleGap());
             instRela.setPreInstanceId(preInstanceId);
             instRela.setPreId(relaDO.getPreId());
+            instRela.setTimestamp(currTime);
+            instRelaList.add(instRela);
         }
         inst.setInstRelaList(instRelaList);
         return inst;
@@ -234,8 +240,8 @@ public class InstanceInitExecuter {
 
 
     class DynamicPriority {
-        DynamicPriority(Integer baseId,Integer level) {
-            this.rootNodeId = baseId;
+        DynamicPriority(Integer rootId,Integer level,Map<Integer,TaskDO> taskDOMap,Map<Integer,List<TaskRelaDO>> reverseMap) {
+            this.rootNodeId = rootId;
             if (level == 1) {
                 point = midLimit + 1;
                 limit = highLimit;
@@ -246,6 +252,8 @@ public class InstanceInitExecuter {
                 point = 1;
                 limit = lowLimit;
             }
+            this.reverseMap = reverseMap;
+            this.taskDOMap = taskDOMap;
         }
 
         private double point;
@@ -257,7 +265,8 @@ public class InstanceInitExecuter {
         private Integer rootNodeId = null;
 
         private Map<Integer, Integer> scoreMap = new HashMap<Integer, Integer>();
-
+        private Map<Integer,List<TaskRelaDO>> reverseMap;
+        private Map<Integer,TaskDO> taskDOMap;
 
         int calculateScore(int taskId, int prioLvl) {
             if (prioLvl < 1) {
@@ -279,7 +288,12 @@ public class InstanceInitExecuter {
         }
 
         private void generateScoreMap(Integer pk) {
-            for (TaskRelaDO rela: reverseRelaMap.get(pk)) {
+            List<TaskRelaDO> relaList = reverseMap.get(pk);
+            //not exists post task，avoid nullpointException
+            if(CollectionUtils.isEmpty(relaList)){
+                return;
+            }
+            for (TaskRelaDO rela: relaList) {
                 Integer childId = rela.getTaskId();
                 if (this.rootNodeId == childId) {
                     return;
@@ -287,7 +301,17 @@ public class InstanceInitExecuter {
                 if (scoreMap.containsKey(childId)) {
                     return;
                 }
-                Integer prioLvl = taskMap.get(childId).getPrioLvl();
+                Integer prioLvl = null;
+                try{
+                    //avoid post task not exists
+                    TaskDO task =taskDOMap.get(childId);
+                    if(task == null){
+                        continue;
+                    }
+                    prioLvl = task.getPrioLvl();
+                }catch(Exception e){
+                    logger.error(childId + " task is invalid or offset if illegal");
+                }
                 this.scoreMap.put(childId, prioLvl);
                 this.generateScoreMap(childId);
             }

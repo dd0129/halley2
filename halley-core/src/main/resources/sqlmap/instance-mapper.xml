@@ -62,11 +62,11 @@
         owner,trigger_time,wait_code,recall_code,success_code,job_code,
         running_prio,timeout)
         values(
-        #{taskStatusId},#{taskId},#{taskName},#{taskGroupId},#{resource},
+        #{instanceId},#{taskId},#{taskName},#{taskGroupId},#{databaseSrc},
         #{taskObj},#{para1},#{para2},#{para3},#{logPath},
         #{cycle},#{timeId},#{status},#{stsDesc},#{ifWait},
         #{ifRecall},#{ifPre},#{prioLvl},#{recallNum},#{runNum},
-        #{recallInterval},#{recallLimit},#{startTime},#{endTime},#{timeStamp},
+        #{recallInterval},#{recallLimit},#{startTime},#{endTime},#{timestamp},
         #{type},#{tableName},#{calDt},#{freq},#{owner},
         #{triggerTime},#{waitCode},#{recallCode},#{successCode},#{jobCode},
         #{runningPrio},#{timeout})
