@@ -2,13 +2,15 @@ package com.dianping.data.warehouse.common;
 
 public class Const {
     public static enum JOB_STATUS{
-        JOB_FAIL(-1),JOB_SUCCESS(1),JOB_INIT(0),JOB_RUNNING(2),JOB_SUSPEND(3),JOB_INIT_ERROR(4),
-        JOB_WAIT(5),JOB_READY(6),JOB_TIMEOUT(7),JOB_PRE_ERROR(8),JOB_POST_ERROR(9);
+        JOB_FAIL(-1,"FAIL"),JOB_SUCCESS(1,"SUCCESS"),JOB_INIT(0,"INIT"),JOB_RUNNING(2,"RUNNING"),JOB_SUSPEND(3,"SUSPEND"),
+        JOB_INIT_ERROR(4,"INITERROR"),JOB_WAIT(5,"WAIT"),JOB_READY(6,"READY"),JOB_TIMEOUT(7,"TIMEOUT"),
+        JOB_PRE_ERROR(8,"PRE_ERROR"),JOB_POST_ERROR(9,"POST_ERROR");
         private Integer value;
         private String desc;
 
-        private JOB_STATUS(Integer value){
+        private JOB_STATUS(Integer value,String desc){
             this.value = value;
+            this.desc = desc;
         }
 
         public Integer getValue() {
@@ -19,7 +21,8 @@ public class Const {
         }
     }
 
-    public final static int RUNTIME_LOGFILE_NOTFOUND = -100;
+    public final static String regex = "return code-";
+    public final static int INTERNAL_EXECUTE_ERROR = -100;
     public final static int TASK_VALIDATE = 1;
     public final static int TASK_INVALIDATE = 1;
     public final static Integer TASK_TYPE_LOAD = 1;
@@ -31,6 +34,8 @@ public class Const {
     public final static Integer TASK_IF_WAIT = 1;
     public final static String EMPTH_STRING = "";
     public final static Integer DEFAULT_TASK_JOBCODE = -1;
+
+    public final static Integer PRE_HOUR = 2;
 
     public static enum TASK_TYPE{
         WORMHOLE(1),CALCULATE(2);

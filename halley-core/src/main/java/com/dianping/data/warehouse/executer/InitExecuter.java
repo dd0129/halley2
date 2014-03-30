@@ -9,8 +9,8 @@ import com.dianping.data.warehouse.domain.InstanceRelaDO;
 import com.dianping.data.warehouse.domain.TaskDO;
 import com.dianping.data.warehouse.domain.TaskRelaDO;
 import com.dianping.data.warehouse.utils.DateUtils;
-import com.dianping.data.warehouse.utils.ParameterUtils;
 import com.dianping.data.warehouse.utils.TaskUtils;
+import com.dianping.data.warehouse.utils.Utilities;
 import com.dianping.data.warehouse.validator.TaskValidator;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.CronExpression;
@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import com.dianping.data.warehouse.utils.Utilities.ParameterUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -52,7 +53,7 @@ public class InitExecuter {
 
         //查询所有依赖
         Date begin = new Date();
-        Date end = new Date(begin.getTime() + 1000 * 3600 * 2);
+        Date end = new Date(begin.getTime() + 1000 * 3600 * Const.PRE_HOUR);
 
         //循环所有任务任务
         for(TaskDO task : list){

@@ -95,7 +95,7 @@
     </update>
 
     <update id="updateInstnaceListStatus" >
-        update etl_task_status set status = #{initStatus},sts_desc=#{desc} where status = #{waitStatus}
+        update etl_task_status set status = #{status},sts_desc=#{desc} where status = #{originStatus}
     </update>
 
     <select id="getRelaInstanceList" resultMap="inst">

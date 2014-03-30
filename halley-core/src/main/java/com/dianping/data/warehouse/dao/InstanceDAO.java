@@ -28,6 +28,6 @@ public interface InstanceDAO {
 
     public List<InstanceDO> getRelaInstanceList(@Param("instanceId") String instanceId);
 
-    public Integer updateInstnaceListStatus(@Param("initStatus") Integer initStatus,@Param("desc") String desc,@Param("waitStatus") Integer waitStatus);
+    public Integer updateInstnaceListStatus(@Param("status") Integer initStatus,@Param("desc") String desc,@Param("originStatus") Integer waitStatus);
 
 }
