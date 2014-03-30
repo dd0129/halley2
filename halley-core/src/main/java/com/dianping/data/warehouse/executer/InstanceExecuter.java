@@ -47,7 +47,7 @@ public class InstanceExecuter {
         return null;
     }
 
-    private String[] executeTask(InstanceDO inst) throws Exception {
+    private Integer executeTask(InstanceDO inst) throws Exception {
         logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") job starts");
         this.instDAO.updateInstnaceRunning(inst.getInstanceId(),Const.JOB_STATUS.JOB_RUNNING.getValue(),Const.JOB_STATUS.JOB_RUNNING.getDesc());
         if(inst.getType()==Const.TASK_TYPE_LOAD){
@@ -60,12 +60,12 @@ public class InstanceExecuter {
         }
     }
 
-    private void recordLog(InstanceDO inst, String[] rtn) {
-        int rtnCode = Integer.valueOf(rtn[0]);
+    private void recordLog(InstanceDO inst, Integer rtn) {
+        //int rtnCode = Integer.valueOf(rtn[0]);
         String[] successCode = inst.getSuccessCode().split(";");
 
         for (int i = 0; i < successCode.length; i++) {
-            if (rtnCode == Integer.valueOf(successCode[i])) {
+            if (rtn == Integer.valueOf(successCode[i])) {
                 this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_SUCCESS.getValue(),
                         Const.JOB_STATUS.JOB_SUCCESS.getDesc());
                 return;
@@ -77,7 +77,7 @@ public class InstanceExecuter {
             if (StringUtils.isNotBlank(inst.getWaitCode())) {
                 waitCodes = inst.getWaitCode().split(";");
                 for (int i = 0; i < waitCodes.length; i++) {
-                    if (rtnCode == Integer.valueOf(waitCodes[i])) {
+                    if (rtn == Integer.valueOf(waitCodes[i])) {
                         this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_SUCCESS.getValue(),
                                 Const.JOB_STATUS.JOB_SUCCESS.getDesc());
                         return;
@@ -109,8 +109,7 @@ public class InstanceExecuter {
                 RunningQueueManager.inQueue(inst);
                 logger.info("Running Queue already run " + RunningQueueManager.size() + " tasks");
                 logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + " join to Running Queue");
-                String[] rtns = this.executeTask(inst);
-                this.recordLog(inst, rtns);
+                this.recordLog(inst, this.executeTask(inst));
                 //this.sendEmail(ts);
             }
         } catch (Exception e) {
