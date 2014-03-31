@@ -35,10 +35,6 @@
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%m%n"/>
         </layout>
-        <!--
-               <layout class="org.apache.log4j.PatternLayout">
-                   <param name="ConversionPattern" value="" />
-               </layout>-->
         <filter class="org.apache.log4j.varia.LevelRangeFilter">
             <param name="LevelMin" value="DEBUG"/>
             <param name="LevelMax" value="DEBUG"/>
@@ -61,21 +57,22 @@
 
     <!-- apache包要输出error以上等级的日志 -->
     <logger name="org.apache">
-        <level value="error"/>
+        <level value="ERROR"/>
     </logger>
 
     <logger name="org.springframework">
-        <level value="warn"/>
+        <level value="WARN"/>
     </logger>
 
     <logger name="com.dianping">
-        <level value="debug"/>
+        <level value="DEBUG"/>
     </logger>
 
-
+    <!--
     <logger name="com.ibatis" additivity="true">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
+
     <logger name="java.sql.Connection" additivity="true">
         <level value="DEBUG" />
     </logger>
@@ -88,13 +85,12 @@
     <logger name="java.sql.ResultSet" additivity="true">
         <level value="DEBUG" />
     </logger>
-
+    -->
     <root>
         <priority value="warn"/>
         <appender-ref ref="filelog"/>
         <appender-ref ref="output"/>
         <appender-ref ref="errorfile"/>
         <appender-ref ref="ConsoleAppender"/>
-        <!-- <appender-ref ref="filelog" /> -->
     </root>
 </log4j:configuration>
