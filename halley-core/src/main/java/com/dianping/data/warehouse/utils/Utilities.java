@@ -2,7 +2,6 @@ package com.dianping.data.warehouse.utils;
 
 import com.dianping.data.warehouse.common.GlobalResource;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +47,7 @@ public class Utilities {
                 while ((line = br.readLine()) != null) {
                     output.write((line + "\r\n").getBytes());
                     snapOutput.write((line + "\r\n").getBytes());
+                    logger.debug(line);
                 }
                 output.close();
                 output = null;
@@ -58,7 +58,6 @@ public class Utilities {
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }finally{
-                //IOUtils.closeStream(br);
                 cleanup(output,snapOutput,br);
             }
         }

@@ -28,8 +28,8 @@ public class TimeoutExecuter {
                 try {
                     Long startTime = inst.getInQueueTimeMillis();
                     Long currentTime = System.currentTimeMillis();
-                    if (currentTime - startTime > inst.getTimeout() * 60) {
-                        logger.info(inst.getInstanceId()+"(" +inst.getTaskName()+")" + "starttime:="+ startTime + "timeout :="+inst.getTimeout() +" minutes");
+                    if (currentTime - startTime > inst.getTimeout() * 60 * 1000) {
+                        logger.info(inst.getInstanceId()+"(" +inst.getTaskName()+") is timeout" + " inqueue time ="+ startTime + " timeout :="+inst.getTimeout() +" minutes");
                         this.instDAO.updateInstnaceStatus(inst.getInstanceId(), Const.JOB_STATUS.JOB_TIMEOUT.getValue(),Const.JOB_STATUS.JOB_TIMEOUT.getDesc());
                     }
                 } catch (Exception e) {

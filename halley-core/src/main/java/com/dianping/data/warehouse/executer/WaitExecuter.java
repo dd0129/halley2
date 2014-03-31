@@ -21,7 +21,10 @@ public class WaitExecuter {
     public void execute(){
         try{
             logger.info("the waitInit starts");
-            this.instDAO.updateInstnaceListStatus(Const.JOB_STATUS.JOB_INIT.getValue(),Const.JOB_STATUS.JOB_INIT.getDesc(),Const.JOB_STATUS.JOB_WAIT.getValue());
+            Integer num = this.instDAO.updateInstnaceListStatus(Const.JOB_STATUS.JOB_INIT.getValue(),
+                    Const.JOB_STATUS.JOB_INIT.getDesc(),
+                    Const.JOB_STATUS.JOB_WAIT.getValue());
+            logger.info("wait executer update task num "+num);
         }finally{
             logger.info("the waitInit ends");
         }

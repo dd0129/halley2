@@ -4,12 +4,14 @@ import com.dianping.data.warehouse.common.Const;
 import com.dianping.data.warehouse.dao.InstanceDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 /**
  * Created by hongdi.tang on 14-3-28.
  */
+@Service("resetExecuter")
 public class ResetExecuter {
     @Resource(name="instanceDAO")
     private InstanceDAO instDAO;
@@ -18,9 +20,11 @@ public class ResetExecuter {
     public void execute(){
         try{
             logger.info("the reset executer starts");
-            this.instDAO.updateInstnaceListStatus(Const.JOB_STATUS.JOB_INIT.getValue(),
+            Integer num = this.instDAO.resetInstance(Const.JOB_STATUS.JOB_INIT.getValue(),
                     Const.JOB_STATUS.JOB_INIT.getDesc(),
-                    Const.JOB_STATUS.JOB_RUNNING.getValue());
+                    Const.JOB_STATUS.JOB_RUNNING.getValue(),
+                    Const.JOB_STATUS.JOB_TIMEOUT.getValue());
+            logger.info("reset update task num "+num);
         }finally{
             logger.info("the reset executer ends");
         }

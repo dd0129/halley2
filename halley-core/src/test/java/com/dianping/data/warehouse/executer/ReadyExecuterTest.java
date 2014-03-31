@@ -11,7 +11,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * Created by adima on 14-3-29.
@@ -26,7 +25,7 @@ public class ReadyExecuterTest {
 
     }
     @Test
-    public void testExecute() throws Exception {
+    public void testUpdateDependency() throws Exception {
         InstanceDO inst = MockData.genInstance();
         inst.setIfPre(0);
         Method method = ReadyExecuter.class.getDeclaredMethod("updateTask", InstanceDO.class);
@@ -36,5 +35,11 @@ public class ReadyExecuterTest {
         inst.setIfPre(1);
         boolean flag1 = (Boolean)method.invoke(service,inst);
         Assert.assertEquals(flag1,true);
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        service.execute();
+        Assert.assertTrue(true);
     }
 }

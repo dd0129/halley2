@@ -30,4 +30,7 @@ public interface InstanceDAO {
 
     public Integer updateInstnaceListStatus(@Param("status") Integer initStatus,@Param("desc") String desc,@Param("originStatus") Integer waitStatus);
 
+    public Integer resetInstance(@Param("status") Integer initStatus,@Param("desc") String desc,
+                                            @Param("status1") Integer status1,@Param("status2") Integer status2);
+
 }

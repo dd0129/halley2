@@ -26,6 +26,7 @@ public class ReadyExecuter {
             try{
                 boolean flag = this.updateTask(inst);
                 if(flag){
+                    logger.info(inst.getInstanceId()+ "("+inst.getTaskName() + ") is ready");
                     this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_READY.getValue(),Const.JOB_STATUS.JOB_READY.getDesc());
                 }
             }catch(Exception e){
@@ -46,7 +47,7 @@ public class ReadyExecuter {
                     return false;
                 }else if(preInst.getStatus() != Const.JOB_STATUS.JOB_SUCCESS.getValue()){
                     logger.info(inst.getInstanceId()+"(" + inst.getTaskName() + ") job is not ready,pre job "
-                            + preInst.getInstanceId() + "(" + preInst.getTaskName() + ") status is " );
+                            + preInst.getInstanceId() + "(" + preInst.getTaskName() + ") status is "+preInst.getStatus() );
                     return false;
                 }else{
                     logger.error(inst.getInstanceId()+"(" + inst.getTaskName() + ") unknow error");

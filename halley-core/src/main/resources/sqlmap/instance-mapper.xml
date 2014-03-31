@@ -78,7 +78,7 @@
         values
         <foreach item="item" index="index" collection="list"
                  open="(" separator="," close=")">
-            (#{item.instanceId},#{item.taskId},#{item.preInstanceId},#{item.preId},#{item.timestamp})
+            #{item.instanceId},#{item.taskId},#{item.preInstanceId},#{item.preId},#{item.timestamp}
         </foreach>
 	</update>
 
@@ -98,9 +98,13 @@
         update etl_task_status set status = #{status},sts_desc=#{desc} where status = #{originStatus}
     </update>
 
+    <update id="resetInstance" >
+        update etl_task_status set status = #{status},sts_desc=#{desc} where status in (#{status1},#{status2})
+    </update>
+
     <select id="getRelaInstanceList" resultMap="inst">
-        select a.task_status_Id,a.task_id,a.task_name,a.status From etl_task_status a left join etl_taskrela_status b on a.task_status_id = b.pre_sts_id
-          where b.task_status_id =#{instanceId}
+        select a.pre_sts_id task_status_id,b.task_id,b.task_name,b.status From etl_taskrela_status a left join etl_task_status b
+        on a.pre_sts_id = b.task_status_id where a.task_status_id=#{instanceId}
     </select>
 
     <select id="getInstanceInfo" resultMap="inst" >

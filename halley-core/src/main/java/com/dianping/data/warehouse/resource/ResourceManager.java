@@ -41,7 +41,7 @@ public class ResourceManager {
                 res.addRunningNum();
                 RESOURCE_MAP.remove(resourceName);
                 RESOURCE_MAP.put(resourceName,res);
-                logger.info(resourceName.concat(" resouce equal" ).concat(String.valueOf(res.getRunningNum())));
+                logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
                 return true;
             }
             logger.info(resourceName.concat(" resouce is full; limit :=" ).concat(String.valueOf(res.getCapability())));
@@ -57,11 +57,13 @@ public class ResourceManager {
             res.minusRunningNum();
             RESOURCE_MAP.remove(resourceName);
             RESOURCE_MAP.put(resourceName,res);
-            logger.info(resourceName.concat(" resouce equal" ).concat(String.valueOf(res.getRunningNum())));
+            logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
         }
     }
 
-
+    public static Resource getResource(String resource){
+        return RESOURCE_MAP.get(resource);
+    }
 
 
 }

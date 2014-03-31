@@ -10,7 +10,6 @@ import com.dianping.data.warehouse.domain.TaskDO;
 import com.dianping.data.warehouse.domain.TaskRelaDO;
 import com.dianping.data.warehouse.utils.DateUtils;
 import com.dianping.data.warehouse.utils.TaskUtils;
-import com.dianping.data.warehouse.utils.Utilities;
 import com.dianping.data.warehouse.validator.TaskValidator;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.CronExpression;
@@ -53,7 +52,7 @@ public class InitExecuter {
 
         //查询所有依赖
         Date begin = new Date();
-        Date end = new Date(begin.getTime() + 1000 * 3600 * Const.PRE_HOUR);
+        Date end = new Date(begin.getTime() + Const.PRE_HOUR);
 
         //循环所有任务任务
         for(TaskDO task : list){
@@ -153,8 +152,8 @@ public class InitExecuter {
             status = Const.JOB_STATUS.JOB_INIT.getValue();
             desc = Const.JOB_STATUS.JOB_INIT.getDesc();
         }else{
-            status = Const.JOB_STATUS.JOB_INIT_ERROR.getValue();
-            desc = Const.JOB_STATUS.JOB_INIT_ERROR.getDesc();
+            status = Const.JOB_STATUS.JOB_INTERNAL_ERROR.getValue();
+            desc = Const.JOB_STATUS.JOB_INTERNAL_ERROR.getDesc();
             logger.error(task.getTaskId()+"("+task.getTaskName()+")" + " init error");
         }
 

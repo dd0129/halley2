@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
@@ -19,7 +18,6 @@ import java.util.List;
 /**
  * Created by adima on 14-3-24.
  */
-@Transactional
 @Service("instanceExecuter")
 public class InstanceExecuter {
     private static Logger logger = LoggerFactory.getLogger(InstanceExecuter.class);
@@ -47,7 +45,7 @@ public class InstanceExecuter {
         return null;
     }
 
-    private Integer executeTask(InstanceDO inst) throws Exception {
+    private Integer executeTask(InstanceDO inst){
         logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") job starts");
         this.instDAO.updateInstnaceRunning(inst.getInstanceId(),Const.JOB_STATUS.JOB_RUNNING.getValue(),Const.JOB_STATUS.JOB_RUNNING.getDesc());
         if(inst.getType()==Const.TASK_TYPE_LOAD){
@@ -55,41 +53,50 @@ public class InstanceExecuter {
         }else if(inst.getType()==Const.TASK_TYPE_CALCULATE){
             return ProcessUtils.executeCommand(inst);
         }else{
-            logger.error("illegal type parameter");
-            throw new IllegalArgumentException("task's type is illegal");
+            this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_INTERNAL_ERROR.getValue(),
+                        Const.JOB_STATUS.JOB_INTERNAL_ERROR.getDesc());
+            logger.error(inst.getInstanceId() + "(" + inst.getTaskName() + ") type "+inst.getType()+ "is illegal type");
+            throw new IllegalArgumentException(inst.getInstanceId() + "(" + inst.getTaskName() + ") type "+inst.getType()+ "is illegal type");
         }
     }
 
     private void recordLog(InstanceDO inst, Integer rtn) {
-        //int rtnCode = Integer.valueOf(rtn[0]);
-        String[] successCode = inst.getSuccessCode().split(";");
-
-        for (int i = 0; i < successCode.length; i++) {
-            if (rtn == Integer.valueOf(successCode[i])) {
-                this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_SUCCESS.getValue(),
-                        Const.JOB_STATUS.JOB_SUCCESS.getDesc());
-                return;
-            }
-        }
-
-        if (inst.getIfWait() == Const.TASK_IF_WAIT) {
-            String[] waitCodes = null;
-            if (StringUtils.isNotBlank(inst.getWaitCode())) {
-                waitCodes = inst.getWaitCode().split(";");
-                for (int i = 0; i < waitCodes.length; i++) {
-                    if (rtn == Integer.valueOf(waitCodes[i])) {
-                        this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_SUCCESS.getValue(),
-                                Const.JOB_STATUS.JOB_SUCCESS.getDesc());
-                        return;
-                    }
+        try{
+            String[] successCodes = inst.getSuccessCode().split(";");
+            for (String successCode : successCodes) {
+                if (rtn == Integer.valueOf(successCode).intValue()) {
+                    logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") is success");
+                    this.instDAO.updateInstnaceStatus(inst.getInstanceId(), Const.JOB_STATUS.JOB_SUCCESS.getValue(),
+                            Const.JOB_STATUS.JOB_SUCCESS.getDesc());
+                    return;
                 }
-            } else {
-                logger.error(inst.getInstanceId() + "(" + inst.getTaskName() + ")" + "  wait_code is null,please handle");
             }
+
+            if (inst.getIfWait() == Const.TASK_IF_WAIT) {
+                String[] waitCodes = null;
+                if (StringUtils.isNotBlank(inst.getWaitCode())) {
+                    waitCodes = inst.getWaitCode().split(";");
+                    for (String waitCode : waitCodes) {
+                        if (rtn == Integer.valueOf(waitCode).intValue()) {
+                            logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") retcode "+rtn+" is wait");
+                            this.instDAO.updateInstnaceStatus(inst.getInstanceId(), Const.JOB_STATUS.JOB_SUCCESS.getValue(),
+                                    Const.JOB_STATUS.JOB_SUCCESS.getDesc());
+                            return;
+                        }
+                    }
+                } else {
+                    logger.error(inst.getInstanceId() + "(" + inst.getTaskName() + ")" + "  wait_code is null,please handle");
+                }
+            }
+            logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") retcode "+rtn+" is fail");
+            this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_FAIL.getValue(),
+                    Const.JOB_STATUS.JOB_FAIL.getDesc());
+        }catch(Throwable e){
+            logger.error(inst.getInstanceId() + "(" + inst.getTaskName() + ")record log error",e);
+            this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_INTERNAL_ERROR.getValue(),
+                    Const.JOB_STATUS.JOB_INTERNAL_ERROR.getDesc());
         }
 
-        this.instDAO.updateInstnaceStatus(inst.getInstanceId(),Const.JOB_STATUS.JOB_FAIL.getValue(),
-                Const.JOB_STATUS.JOB_FAIL.getDesc());
     }
 
     public void execute() {

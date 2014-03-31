@@ -25,10 +25,11 @@ public class ProcessUtils {
         FileOutputStream snapStream = null;
         BufferedReader br = null;
         String cmdLine = StringUtils.join(new String[]{inst.getTaskObj(),inst.getPara1(),inst.getPara2(),inst.getPara3()}," ");
+        logger.debug("cmdline := "+cmdLine);
         try{
             Process process = Runtime.getRuntime().exec(cmdLine);
-            File outputFile = new File("");
-            File snapshotOutputFile = new File("");
+            File outputFile = new File(inst.getLogPath());
+            File snapshotOutputFile = new File(StringUtils.join(new String[]{inst.getLogPath(), "snapshot"}, "."));
             outStream = new FileOutputStream(outputFile, true);
             snapStream = new FileOutputStream(snapshotOutputFile, true);
 
@@ -46,6 +47,7 @@ public class ProcessUtils {
                 outStream.write((line + "\r\n").getBytes());
                 snapStream.write((line + "\r\n").getBytes());
                 Matcher match = pattern.matcher(line);
+                logger.debug(line);
                 if(match.find()){
                     rtnCodeStr = line;
                     logger.debug("rtn code str:" + line );
@@ -74,10 +76,11 @@ public class ProcessUtils {
 
     public static Integer executeCommand(InstanceDO inst){
         String cmdLine = StringUtils.join(new String[]{inst.getTaskObj(),inst.getPara1(),inst.getPara2(),inst.getPara3()}," ");
+        logger.debug("cmdline := "+cmdLine);
         try{
             Process process = Runtime.getRuntime().exec(cmdLine);
-            File outputFile = new File("");
-            File snapshotOutputFile = new File("");
+            File outputFile = new File(inst.getLogPath());
+            File snapshotOutputFile = new File(StringUtils.join(new String[]{inst.getLogPath(), "snapshot"}, "."));
             StreamWriter outPrinter = new StreamWriter(process.getInputStream(), outputFile,snapshotOutputFile);
             StreamWriter errPrinter = new StreamWriter(process.getErrorStream(), outputFile,snapshotOutputFile);
             outPrinter.start();

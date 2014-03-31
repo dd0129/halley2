@@ -22,11 +22,6 @@ public class SynchronizeExecuter {
     @Resource(name = "instanceDAO")
     private InstanceDAO instDAO;
 
-    private Integer interval;
-    public void setInterval(Integer interval) {
-        this.interval = interval;
-    }
-
     public void execute() {
         boolean flag = false;
         try {
@@ -34,21 +29,24 @@ public class SynchronizeExecuter {
             for (Map.Entry<String, InstanceDO> entry : RunningQueueManager.entrySet()) {
                 InstanceDO inst = entry.getValue();
                 Long inQueueTime = inst.getInQueueTimeMillis();
-                logger.info("current time " + System.currentTimeMillis() + "; " + inst.getInstanceId() + "(" + inst.getTaskName() +
-                        ") push queue time " + inst.getInQueueTimeMillis());
-                Integer status = instDAO.getInstanceInfo(inst.getInstanceId()).getStatus();
-                logger.info("task status " + status);
+                logger.info(inst.getInstanceId() + "(" + inst.getTaskName() +
+                        ") in queue time " + inst.getInQueueTimeMillis());
                 try{
-                    if (System.currentTimeMillis() - inQueueTime > interval * 1000) {
-                        if (status != Const.JOB_STATUS.JOB_RUNNING.getValue() && status != Const.JOB_STATUS.JOB_RUNNING.getValue()) {
-                            logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") status is "+inst.getStatus() +" in queue "+ String.valueOf(inst.getInQueueTimeMillis()) + " has been kicked");
+                    if (System.currentTimeMillis() - inQueueTime > Const.WAIT_INTERVAL) {
+                        Integer status = instDAO.getInstanceInfo(inst.getInstanceId()).getStatus();
+                        if (status != Const.JOB_STATUS.JOB_RUNNING.getValue() &&
+                                status != Const.JOB_STATUS.JOB_TIMEOUT.getValue()) {
+                            logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") status is, "+inst.getStatus() +" in queue time at"+ String.valueOf(inst.getInQueueTimeMillis()) + " has been kicked");
                             RunningQueueManager.outQueue(inst);
                             flag = true;
                         }
                     }
+                }catch(Exception e){
+                    logger.error(inst.getInstanceId() + "(" + inst.getTaskName() + ") synchronize error",e);
                 }finally{
                     if(inst!= null && flag){
                         ResourceManager.release(inst.getDatabaseSrc());
+                        logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + ") release resource");
                     }
                 }
             }

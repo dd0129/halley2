@@ -14,9 +14,11 @@ public class RunningQueueManager {
     private static Map<String, InstanceDO> runningQueue = new ConcurrentHashMap<String, InstanceDO>();
     private RunningQueueManager(){};
 
-    public static synchronized boolean isDuplicateTask(Integer taskId){
+    public static boolean isDuplicateTask(Integer taskId){
         for(InstanceDO inst : runningQueue.values()){
-            return inst.getTaskId() == taskId;
+            if(inst.getTaskId().intValue() == taskId.intValue()){
+                return true;
+            }
         }
         return false;
     }
@@ -44,4 +46,6 @@ public class RunningQueueManager {
     public static Set<Map.Entry<String, InstanceDO>> entrySet(){
         return runningQueue.entrySet();
     }
+
+
 }
