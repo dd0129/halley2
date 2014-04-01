@@ -21,7 +21,10 @@ public class PigeonHandler implements ExternalExecuter{
     @Override
     public boolean execute(ExternalDO extTask) {
         try{
+            String s = null;
+
             Class clazz = Class.forName(extTask.getImplClass());
+
             Method method = clazz.getDeclaredMethod("run", Map.class);
             List<String> list = JacksonHelper.jsonToPojo(extTask.getParameterMap(),Map.class);
 

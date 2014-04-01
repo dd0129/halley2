@@ -1,6 +1,5 @@
 package com.dianping.data.warehouse.halley.common;
 
-import net.sf.json.JSONObject;
 
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class Param {
     }
 
     public static Map<String,String> parseRtnInfo(String rtnStr){
-        JSONObject resJson = JSONObject.fromObject(rtnStr);
+        //JSONObject resJson = JSONObject.fromObject(rtnStr);
         return null;
     }
 }
