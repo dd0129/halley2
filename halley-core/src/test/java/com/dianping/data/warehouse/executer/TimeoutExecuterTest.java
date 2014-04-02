@@ -16,7 +16,7 @@ import javax.annotation.Resource;
  * Created by hongdi.tang on 14-3-31.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:spring-applicationcontext.xml")
+@ContextConfiguration("classpath:test-spring-applicationcontext.xml")
 public class TimeoutExecuterTest {
 
     @Resource(name="timeoutExecuter")

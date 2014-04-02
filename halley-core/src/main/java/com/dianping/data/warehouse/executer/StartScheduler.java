@@ -8,7 +8,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class StartScheduler {
     public static void main(String[] args){
-        new ClassPathXmlApplicationContext("classpath:spring-applicationcontext.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-applicationcontext.xml");
+        context.getBean("fuck");
+
 
     }
 }

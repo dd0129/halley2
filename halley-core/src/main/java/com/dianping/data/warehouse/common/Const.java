@@ -88,5 +88,6 @@ public class Const {
 
     public final static Integer WAIT_INTERVAL = 5 * 60 * 1000;
 
+    public final static String EXTERNAL_CLASSPATH= "d:/data/deploy";
 
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * Created by hongdi.tang on 14-3-24.
  */
-public interface PigeonClient {
+public interface Client {
     public String run(Map<String,String> commands);
 
 

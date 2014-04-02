@@ -1,10 +1,5 @@
 package com.dianping.data.warehouse.halley.common;
 
-import net.sf.json.JSONObject;
-
-import java.util.Map;
-
-
 /**
  * Created by hongdi.tang on 14-4-1.
  */
@@ -28,8 +23,4 @@ public class Param {
         }
     }
 
-    public static Map<String,String> parseRtnInfo(String rtnStr){
-        JSONObject resJson = JSONObject.fromObject(rtnStr);
-        return null;
-    }
 }

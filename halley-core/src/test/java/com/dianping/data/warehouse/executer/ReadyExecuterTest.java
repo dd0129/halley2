@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
  * Created by adima on 14-3-29.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:spring-applicationcontext.xml")
+@ContextConfiguration("classpath:test-spring-applicationcontext.xml")
 public class ReadyExecuterTest {
     @Resource(name="readyExecuter")
     private ReadyExecuter service;

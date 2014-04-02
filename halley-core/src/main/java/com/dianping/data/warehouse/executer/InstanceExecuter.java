@@ -117,6 +117,7 @@ public class InstanceExecuter {
                 logger.info("Running Queue already run " + RunningQueueManager.size() + " tasks");
                 logger.info(inst.getInstanceId() + "(" + inst.getTaskName() + " join to Running Queue");
                 this.recordLog(inst, this.executeTask(inst));
+                //
                 //this.sendEmail(ts);
             }
         } catch (Exception e) {
