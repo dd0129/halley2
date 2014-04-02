@@ -4,11 +4,9 @@ import com.dianping.data.warehouse.common.Const;
 import com.dianping.data.warehouse.domain.ExternalDO;
 import com.dianping.data.warehouse.domain.InstanceDO;
 import com.dianping.data.warehouse.halley.common.Param;
-import org.codehaus.jackson.map.util.JSONPObject;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,7 +35,7 @@ public class ExternalHandlerImpl implements ExternalExecuter{
         return false;
     }
 
-    private List<String> parseRtnStr(){
-        JSONPObject obj = parseRtnStr().get(Param.RETURN_STR.code.toString());
-    }
+//    private List<String> parseRtnStr(){
+//        JSONPObject obj = parseRtnStr().get(Param.RETURN_STR.code.toString());
+//    }
 }
