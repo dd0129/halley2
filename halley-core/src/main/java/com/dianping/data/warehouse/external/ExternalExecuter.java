@@ -9,5 +9,5 @@ import com.dianping.data.warehouse.domain.InstanceDO;
 
 public interface ExternalExecuter {
 
-    boolean execute(InstanceDO inst,ExternalDO extTask);
+    Integer execute(InstanceDO inst,ExternalDO extTask);
 }

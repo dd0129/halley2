@@ -7,10 +7,20 @@ public class Const {
         JOB_PRE_ERROR(8,"PRE_ERROR"),JOB_POST_ERROR(9,"POST_ERROR");
         private Integer value;
         private String desc;
+        private Integer extCode;
+
+        public Integer getExtCode() {
+            return extCode;
+        }
 
         private JOB_STATUS(Integer value,String desc){
             this.value = value;
             this.desc = desc;
+        }
+        private JOB_STATUS(Integer value,String desc,Integer extCode){
+            this.value = value;
+            this.desc = desc;
+            this.extCode = extCode;
         }
 
         public Integer getValue() {

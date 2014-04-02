@@ -1,5 +1,6 @@
 package com.dianping.data.warehouse.halley.common;
 
+
 import java.util.Map;
 
 

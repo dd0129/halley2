@@ -30,7 +30,7 @@ public class ResourceManager {
         }
     }
 
-    public static synchronized boolean allocate(String resourceName){
+    public static boolean allocate(String resourceName){
         Resource res = RESOURCE_MAP.get(resourceName);
         if(res == null){
             RESOURCE_MAP.put(resourceName, new Resource(resourceName,1,1));
@@ -49,14 +49,12 @@ public class ResourceManager {
         }
     }
 
-    public static synchronized void release(String resourceName){
+    public static void release(String resourceName){
         Resource res = RESOURCE_MAP.get(resourceName);
         if(res == null){
             logger.info(resourceName.concat(" is not exists"));
         } else{
             res.minusRunningNum();
-            RESOURCE_MAP.remove(resourceName);
-            RESOURCE_MAP.put(resourceName,res);
             logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
         }
     }
@@ -65,5 +63,49 @@ public class ResourceManager {
         return RESOURCE_MAP.get(resource);
     }
 
+    private static class Resource{
+        private String resourceName;
+        private Integer capability;
+        private Integer runningNum;
 
+        public Resource(String resourceName, Integer capability, Integer runningNum) {
+            this.resourceName = resourceName;
+            this.capability = capability;
+            this.runningNum = runningNum;
+        }
+
+        public Integer getCapability() {
+            return capability;
+        }
+
+        public void setCapability(Integer capability) {
+            this.capability = capability;
+        }
+
+        public String getResourceName() {
+            return resourceName;
+        }
+
+        public void setResourceName(String resourceName) {
+            this.resourceName = resourceName;
+        }
+
+
+
+        public Integer getRunningNum() {
+            return runningNum;
+        }
+
+        public void setRunningNum(Integer runningNum) {
+            this.runningNum = runningNum;
+        }
+
+        public synchronized void addRunningNum() {
+            ++this.runningNum ;
+        }
+
+        public synchronized void minusRunningNum() {
+            --this.runningNum ;
+        }
+    }
 }

@@ -14,7 +14,7 @@ public class RunningQueueManager {
     private static Map<String, InstanceDO> runningQueue = new ConcurrentHashMap<String, InstanceDO>();
     private RunningQueueManager(){};
 
-    public static boolean isDuplicateTask(Integer taskId){
+    public static synchronized boolean isDuplicateTask(Integer taskId){
         for(InstanceDO inst : runningQueue.values()){
             if(inst.getTaskId().intValue() == taskId.intValue()){
                 return true;
