@@ -1,5 +1,8 @@
 package com.dianping.data.warehouse.halley.common;
 
+import java.util.Map;
+
+
 /**
  * Created by hongdi.tang on 14-4-1.
  */
