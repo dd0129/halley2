@@ -1,5 +1,6 @@
 package com.dianping.data.warehouse.resource;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,30 +33,34 @@ public class ResourceManager {
 
     public static boolean allocate(String resourceName){
         Resource res = RESOURCE_MAP.get(resourceName);
-        if(res == null){
-            RESOURCE_MAP.put(resourceName, new Resource(resourceName,1,1));
-            logger.info(resourceName.concat(" join Resouce Map"));
-            return true;
-        } else{
-            if(res.getRunningNum()<res.getCapability()){
-                res.addRunningNum();
-                RESOURCE_MAP.remove(resourceName);
-                RESOURCE_MAP.put(resourceName,res);
-                logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
+        synchronized (res){
+            if(res == null){
+                RESOURCE_MAP.put(resourceName, new Resource(resourceName, 1, 1));
+                logger.info(resourceName.concat(" join Resouce Map"));
                 return true;
+            } else{
+                if(res.getRunningNum()<res.getCapability()){
+                    res.addRunningNum();
+                    RESOURCE_MAP.remove(resourceName);
+                    RESOURCE_MAP.put(resourceName,res);
+                    logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
+                    return true;
+                }
+                logger.info(resourceName.concat(" resouce is full; limit :=" ).concat(String.valueOf(res.getCapability())));
+                return false;
             }
-            logger.info(resourceName.concat(" resouce is full; limit :=" ).concat(String.valueOf(res.getCapability())));
-            return false;
         }
     }
 
     public static void release(String resourceName){
         Resource res = RESOURCE_MAP.get(resourceName);
-        if(res == null){
-            logger.info(resourceName.concat(" is not exists"));
-        } else{
-            res.minusRunningNum();
-            logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
+        synchronized (res){
+            if(res == null){
+                logger.info(resourceName.concat(" is not exists"));
+            } else{
+                res.minusRunningNum();
+                logger.info(resourceName.concat(" resouce equal " ).concat(String.valueOf(res.getRunningNum())));
+            }
         }
     }
 
@@ -100,11 +105,11 @@ public class ResourceManager {
             this.runningNum = runningNum;
         }
 
-        public synchronized void addRunningNum() {
+        public  void addRunningNum() {
             ++this.runningNum ;
         }
 
-        public synchronized void minusRunningNum() {
+        public  void minusRunningNum() {
             --this.runningNum ;
         }
     }
